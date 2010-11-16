@@ -7,13 +7,44 @@ var list;
 var result;
 
 // Small improvement - sign function returning {-1|0|1} according to the sign of number
-Number.prototype.sign = function()
-{
+Number.prototype.sign = function(){
 	if (this < 0) 
 		return -1;
 	if (this > 0)
 		return 1;
 	return 0;
+}
+
+// Returns first element in the array
+Array.prototype.first = function(){
+	return this[0];
+}
+
+// Returns last element in the array
+Array.prototype.last = function(){
+	return this[this.length-1];
+}
+
+// Class representing item position 
+function Pos()
+{
+	switch (typeof arguments[0])
+	{
+		case 'number' : this.x = arguments[0];
+						this.y = arguments[1];
+						break;
+		case 'string' : this.x = parseInt(arguments[0].substr(1,1));
+						this.y = parseInt(arguments[0].substr(2,1));
+						break;
+		case 'object' : this.x = arguments[0].x;
+						this.y = arguments[0].y;
+						break;
+		default : alert('Unknown type passed into Pos construtor?');
+	}
+		
+	this.getItem = function(){ // Returns HTML element at specified position
+			return $(('e'+this.x)+this.y);
+		}
 }
 
 function newGame()
@@ -55,60 +86,81 @@ function repaint()
 function click()
 {
 // 	Get the coordinates of selected item
-	var x = this.id.substr(1,1);
-	var y = this.id.substr(2,1);
+	var pos = new Pos(this.id);
 	
-	if(selectable(x,y)) // Select
-		select(x,y);
-	else if((list.length > 0) && list[0][0] == x && list[0][1] == y) // or unselect
+	if(selectable(pos)) // Select
+		select(pos);
+	else if((list.length > 0) && list.first().x == pos.x && list.first().y == pos.y) // or unselect
 	{
 		list.shift();
-		$(('e'+x)+y).removeClassName('selected');
+		pos.getItem().removeClassName('selected');
 	}
 }
 
 function dblclick()
 {
-	var x = this.id.substr(1,1);
-	var y = this.id.substr(2,1);
+// 	Get the coordinates of selected item
+	var pos = new Pos(this.id);
 	
-	if(selectable(x,y))
-		select(x,y);
+	if(selectable(pos))
+		select(pos);
 	remove();
 	repaint();
+	
+	for(var i = 0; i < COLOURS_NO-2; i++)
+		if(result[i] > 0)
+			return;
+
+	alert("You won!");
+	newGame();
 }
 
-function selectable(x,y)
+function mouseover()
+{
+// 	Get the coordinates of selected item
+	var pos = new Pos(this.id);
+	if(selectable(pos))
+		pos.getItem().addClassName('selectable');
+}
+
+function mouseleave()
+{
+	var l = $$('.selectable');
+	for(var i = 0; i < l.length; i++)
+		l[i].removeClassName('selectable');
+}
+
+function selectable(pos)
 {
 	if(list.length > 0) // Cannot select the same again
 		for(var i = 0; i < list.length; i++) // So check all items on the list
-			if(list[i][0] == x && list[i][1] == y)
+			if(list[i].x == pos.x && list[i].y == pos.y)
 				return false;
 	
-	if(tab[x][y] == COLOURS.STONE) // Is a stone
+	if(tab[pos.x][pos.y] == COLOURS.STONE) // Is a stone
 		return false;
 	
 	if(list.length == 0) // Nothing selected
-		if(tab[x][y] == COLOURS.MULTI)
+		if(tab[pos.x][pos.y] == COLOURS.MULTI)
 			return false;
 		else
 			return true;
 	
-	if(tab[x][y] == tab[list[list.length-1][0]][list[list.length-1][1]] || tab[x][y] == COLOURS.MULTI) // The same colour or multi-colour
+	if(tab[pos.x][pos.y] == tab[list.last().x][list.last().y] || tab[pos.x][pos.y] == COLOURS.MULTI) // The same colour or multi-colour
 	{
-		if(list[0][0] == x) // Selected item is in the same column
+		if(list.first().x == pos.x) // Selected item is in the same column
 		{
-			var t = list[0][1]-y;
+			var t = list.first().y-pos.y;
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
-				if(tab[x][parseInt(y)+t] == tab[x][y] || tab[x][parseInt(y)+t] == COLOURS.STONE)
+				if(tab[pos.x][parseInt(pos.y)+t] == tab[pos.x][pos.y] || tab[pos.x][parseInt(pos.y)+t] == COLOURS.STONE)
 					return false;
 			return true;
 		}
-		if(list[0][1] == y) // Selected item is in the same row
+		if(list.first().y == pos.y) // Selected item is in the same row
 		{
-			var t = list[0][0]-x;
+			var t = list.first().x-pos.x;
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
-				if(tab[parseInt(x)+t][y] == tab[x][y] || tab[parseInt(x)+t][y] == COLOURS.MULTI || tab[parseInt(x)+t][y] == COLOURS.STONE)
+				if(tab[parseInt(pos.x)+t][pos.y] == tab[pos.x][pos.y] || tab[parseInt(pos.x)+t][pos.y] == COLOURS.MULTI || tab[parseInt(pos.x)+t][pos.y] == COLOURS.STONE)
 					return false;
 			return true;
 		}
@@ -117,10 +169,10 @@ function selectable(x,y)
 	return false;
 }
 
-function select(x, y)
+function select(pos)
 {
-	list.unshift(new Array(x, y));
-	$(('e'+x)+y).addClassName('selected');
+	list.unshift(pos);
+	pos.getItem().addClassName('selected');
 }
 
 function getRandom()
@@ -136,14 +188,14 @@ function remove()
 	if(list.length < 2)
 		return;
 	
-	result[tab[list[0][0]][list[0][1]]] -= list.length;
-	if(result[tab[list[0][0]][list[0][1]]] < 0)
-		result[tab[list[0][0]][list[0][1]]] = 0;
+	result[tab[list.first().x][list.first().y]] -= list.length;
+	if(result[tab[list.first().x][list.first().y]] < 0)
+		result[tab[list.first().x][list.first().y]] = 0;
 	
 	while(list.length > 0)
 	{
-		tab[list[0][0]][list[0][1]] = getRandom(); // Add an animation
-		$(('e'+list[0][0])+list[0][1]).removeClassName('selected');
+		tab[list.first().x][list.first().y] = getRandom(); // Add an animation
+		list.first().getItem().removeClassName('selected');
 		list.shift();
 	}
 }
@@ -156,10 +208,12 @@ window.onload = function(){
 			$('board').appendChild(e);
 			e.observe('click', click);
 			e.observe('dblclick', dblclick);
+			e.observe('mouseover', mouseover);
+			e.observe('mouseleave', mouseleave);
 		}
 	newGame();
 	
-//	Don't even look at this - this is treated as a dangerous crime in some places ;)
+//	Don't even look at this - this is treated as a dangerous crime in some countries ;)
 	var txt = '';
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
