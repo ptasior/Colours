@@ -1,6 +1,6 @@
 body
 {
-	background-color: green;
+	background-color: #905803;
 }
 
 #board
@@ -33,5 +33,24 @@ body
 	top: 80px;
 	left: 20px;
 	border: 1px dashed black;
-	background-color: white
+	background-color: white;
+}
+
+#candle
+{
+	position: absolute;
+	top: 80px;
+	left: 820px;
+	width: 150px;
+	height: 320px;
+	border: 1px dashed black;
+	text-align: center;
+	background-color: white;
+}
+
+#candle_wrap
+{
+	height: 300px;
+	margin: 8px auto;
+	overflow: hidden;
 }

@@ -5,6 +5,8 @@ const COLOURS = {0:'red.png', 1:'green.png', 2:'blue.png', 3:'purple.png', 4:'ye
 var tab;
 var list;
 var result;
+var clicks;
+var timer;
 
 // Small improvement - sign function returning {-1|0|1} according to the sign of number
 Number.prototype.sign = function(){
@@ -69,7 +71,12 @@ function newGame()
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
 			tab[i][j] = getRandom();
-		
+	
+	clicks = 0;
+	
+	candle_top = 0;
+	timer = new PeriodicalExecuter(ontimer,1);
+	
 	repaint();
 }
 
@@ -84,6 +91,7 @@ function repaint()
 	for(var i = 0; i < COLOURS_NO-2; i++)
 		txt += '<img src="gfx/'+COLOURS[i]+'">'+result[i]+'<br>';
 	
+	txt += '<br>Clicks: '+clicks;
 	$('status').update(txt);
 }
 
@@ -207,6 +215,20 @@ function remove()
 		list.first().getItem().removeClassName('selected');
 		list.shift();
 	}
+	
+	clicks++;
+}
+
+function ontimer()
+{
+	candle_top+=0.5;
+	if(candle_top > 220)
+	{
+		timer.stop();
+		alert('Time is over');
+		newGame();
+	}
+	$('candle_img').setStyle({marginTop: Math.floor(candle_top)+'px'});
 }
 
 window.onload = function(){
@@ -218,9 +240,10 @@ window.onload = function(){
 			e.observe('click', click);
 			e.observe('mouseover', mouseover);
 		}
+		
 	newGame();
 	
-//	Don't even look at this - this is treated as a dangerous crime in some countries ;)
+//	DON'T EVEN LOOK AT THIS - this is treated as a dangerous crime in some countries ;)
 	var txt = '';
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
