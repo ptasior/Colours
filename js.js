@@ -6,6 +6,16 @@ var tab;
 var list;
 var result;
 
+// Small improvement - sign function returning {-1|0|1} according to the sign of number
+Number.prototype.sign = function()
+{
+	if (this < 0) 
+		return -1;
+	if (this > 0)
+		return 1;
+	return 0;
+}
+
 function newGame()
 {
 // 	Allocating array
@@ -70,8 +80,10 @@ function dblclick()
 
 function selectable(x,y)
 {
-	if((list.length > 0) && (list[0][0] == x && list[0][1] == y)) // Cannot select the same again
-		return false;
+	if(list.length > 0) // Cannot select the same again
+		for(var i = 0; i < list.length; i++) // So check all items on the list
+			if(list[i][0] == x && list[i][1] == y)
+				return false;
 	
 	if(tab[x][y] == COLOURS.STONE) // Is a stone
 		return false;
@@ -82,9 +94,25 @@ function selectable(x,y)
 		else
 			return true;
 	
-	if(list[0][0] == x || list[0][1] == y) // Selected item is in proper row/column
-		if(tab[x][y] == tab[list[list.length-1][0]][list[list.length-1][1]] || tab[x][y] == COLOURS.MULTI) // The same colour or multi
+	if(tab[x][y] == tab[list[list.length-1][0]][list[list.length-1][1]] || tab[x][y] == COLOURS.MULTI) // The same colour or multi-colour
+	{
+		if(list[0][0] == x) // Selected item is in the same column
+		{
+			var t = list[0][1]-y;
+			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
+				if(tab[x][parseInt(y)+t] == tab[x][y] || tab[x][parseInt(y)+t] == COLOURS.STONE)
+					return false;
 			return true;
+		}
+		if(list[0][1] == y) // Selected item is in the same row
+		{
+			var t = list[0][0]-x;
+			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
+				if(tab[parseInt(x)+t][y] == tab[x][y] || tab[parseInt(x)+t][y] == COLOURS.MULTI || tab[parseInt(x)+t][y] == COLOURS.STONE)
+					return false;
+			return true;
+		}
+	}
 	
 	return false;
 }
@@ -140,4 +168,3 @@ window.onload = function(){
 		}
 	$('styl').update(txt);
 }
-
