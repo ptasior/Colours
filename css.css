@@ -24,14 +24,7 @@ body
 
 .selected
 {
-/* 	border-style: dotted !important; */
 	opacity: 0.5;
-}
-
-.selectable
-{
-	border-style: dotted !important;
-/* 	opacity: 0.5; */
 }
 
 #status

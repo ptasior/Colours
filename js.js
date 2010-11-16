@@ -25,6 +25,10 @@ Array.prototype.last = function(){
 	return this[this.length-1];
 }
 
+Array.prototype.isEmpty = function(){
+	return this.length == 0;
+}
+
 // Class representing item position 
 function Pos()
 {
@@ -88,55 +92,45 @@ function click()
 // 	Get the coordinates of selected item
 	var pos = new Pos(this.id);
 	
-	if(selectable(pos)) // Select
+	if(list.length == 0 && selectable(pos)) // Select
 		select(pos);
-	else if((list.length > 0) && list.first().x == pos.x && list.first().y == pos.y) // or unselect
+	else if((list.length == 1) && list.first().x == pos.x && list.first().y == pos.y) // or unselect
 	{
 		list.shift();
 		pos.getItem().removeClassName('selected');
 	}
-}
-
-function dblclick()
-{
-// 	Get the coordinates of selected item
-	var pos = new Pos(this.id);
-	
-	if(selectable(pos))
-		select(pos);
-	remove();
-	repaint();
-	
-	for(var i = 0; i < COLOURS_NO-2; i++)
-		if(result[i] > 0)
-			return;
-
-	alert("You won!");
-	newGame();
+	else if(list.length > 2 && list.first().x == pos.x && list.first().y == pos.y) // End click (has to be clicked on the last item
+	{
+		remove();
+		repaint();
+		
+		for(var i = 0; i < COLOURS_NO-2; i++)
+			if(result[i] > 0)
+				return;
+		
+		alert("You won!");
+		newGame();
+	}
 }
 
 function mouseover()
 {
+	if(list.isEmpty())
+		return;
+	
 // 	Get the coordinates of selected item
 	var pos = new Pos(this.id);
 	if(selectable(pos))
-		pos.getItem().addClassName('selectable');
-}
-
-function mouseleave()
-{
-	var l = $$('.selectable');
-	for(var i = 0; i < l.length; i++)
-		l[i].removeClassName('selectable');
+		select(pos);
+	if(list.length > 1 && list[1].x == pos.x && list[1].y == pos.y)
+	{
+		list[0].getItem().removeClassName('selected');
+		list.shift();
+	}
 }
 
 function selectable(pos)
 {
-	if(list.length > 0) // Cannot select the same again
-		for(var i = 0; i < list.length; i++) // So check all items on the list
-			if(list[i].x == pos.x && list[i].y == pos.y)
-				return false;
-	
 	if(tab[pos.x][pos.y] == COLOURS.STONE) // Is a stone
 		return false;
 	
@@ -146,13 +140,28 @@ function selectable(pos)
 		else
 			return true;
 	
+	if(!list.isEmpty()) // Cannot select the same again
+		for(var i = 0; i < list.length; i++) // So check all items on the list
+			if(list[i].x == pos.x && list[i].y == pos.y)
+				return false;
+			
+	if(list.length > 1)  // Avoiding jumping back over already selected
+	{
+		if((list[1].y == list[0].y && list[0].y == pos.y) && // If 2 last are the same axis
+			((list[1].x-list[0].x).sign() != (list[0].x-pos.x).sign())) // And the direction is the backward
+			return false;
+		if((list[1].x == list[0].x && list[0].x == pos.x) && // If 2 last are the same axis
+			((list[1].y-list[0].y).sign() != (list[0].y-pos.y).sign())) // And the direction is the backward
+			return false;
+	}
+	
 	if(tab[pos.x][pos.y] == tab[list.last().x][list.last().y] || tab[pos.x][pos.y] == COLOURS.MULTI) // The same colour or multi-colour
 	{
 		if(list.first().x == pos.x) // Selected item is in the same column
 		{
 			var t = list.first().y-pos.y;
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
-				if(tab[pos.x][parseInt(pos.y)+t] == tab[pos.x][pos.y] || tab[pos.x][parseInt(pos.y)+t] == COLOURS.STONE)
+				if(tab[pos.x][pos.y+t] == COLOURS.STONE)
 					return false;
 			return true;
 		}
@@ -160,7 +169,7 @@ function selectable(pos)
 		{
 			var t = list.first().x-pos.x;
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
-				if(tab[parseInt(pos.x)+t][pos.y] == tab[pos.x][pos.y] || tab[parseInt(pos.x)+t][pos.y] == COLOURS.MULTI || tab[parseInt(pos.x)+t][pos.y] == COLOURS.STONE)
+				if(tab[pos.x+t][pos.y] == COLOURS.STONE)
 					return false;
 			return true;
 		}
@@ -207,9 +216,7 @@ window.onload = function(){
 			var e = new Element('a', {'id': ('e'+i)+j});
 			$('board').appendChild(e);
 			e.observe('click', click);
-			e.observe('dblclick', dblclick);
 			e.observe('mouseover', mouseover);
-			e.observe('mouseleave', mouseleave);
 		}
 	newGame();
 	
