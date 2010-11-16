@@ -18,7 +18,7 @@ function newGame()
 	
 // 	Assigning number of colours to be removed
 	for(var i = 0; i < COLOURS_NO-2; i++)
-		result[i] = Math.floor(Math.random()*100);
+		result[i] = Math.floor(Math.random()*30+20);
 	
 // 	Filling it
 	for(var i = 0; i < WIDTH; i++)
@@ -34,6 +34,7 @@ function repaint()
 		for(var j = 0; j < HEIGHT; j++)
 			$(('e'+i)+j).setStyle({backgroundImage: 'url(gfx/'+COLOURS[tab[i][j]]+')'});
 		
+	// FIXME - convert to some legal methods
 	var txt = '';
 	for(var i = 0; i < COLOURS_NO-2; i++)
 		txt += '<img src="gfx/'+COLOURS[i]+'">'+result[i]+'<br>';
@@ -47,9 +48,9 @@ function click()
 	var x = this.id.substr(1,1);
 	var y = this.id.substr(2,1);
 	
-	if(selectable(x,y))
+	if(selectable(x,y)) // Select
 		select(x,y);
-	else if((list.length > 0) && list[0][0] == x && list[0][1] == y) // Unselecting
+	else if((list.length > 0) && list[0][0] == x && list[0][1] == y) // or unselect
 	{
 		list.shift();
 		$(('e'+x)+y).removeClassName('selected');
@@ -127,10 +128,16 @@ window.onload = function(){
 			$('board').appendChild(e);
 			e.observe('click', click);
 			e.observe('dblclick', dblclick);
-			// temporary
-			e.setStyle({left: i*40+'px'});
-			e.setStyle({top: j*55+'px'});
 		}
 	newGame();
+	
+//	Don't even look at this - this is treated as a dangerous crime in some places ;)
+	var txt = '';
+	for(var i = 0; i < WIDTH; i++)
+		for(var j = 0; j < HEIGHT; j++)
+		{
+			txt+=('#e'+i)+j+"\n{\nleft: "+(192+i*49-j*13)+"px;\ntop: "+(37+j*37+i*17)+"px;\n}\n\n";
+		}
+	$('styl').update(txt);
 }
 

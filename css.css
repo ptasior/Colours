@@ -1,12 +1,17 @@
+body
+{
+	background-color: green;
+}
+
 #board
 {
 	position: absolute;
-	width: 350px;
-	height: 300px;
-	left: 150px;
+	width: 680px;
+	height: 436px;
+	left: 100px;
 	padding: 5px;
-	border: 1px gray solid;
 	overflow: auto;
+	background-image: url('gfx/board.png');
 }
 
 #board a
@@ -24,4 +29,9 @@
 
 #status
 {
+	position: absolute;
+	top: 80px;
+	left: 20px;
+	border: 1px dashed black;
+	background-color: white
 }
