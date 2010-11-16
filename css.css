@@ -1,0 +1,27 @@
+#board
+{
+	position: absolute;
+	width: 180px;
+	height: 180px;
+	padding: 5px;
+	border: 1px gray solid;
+	overflow: auto;
+}
+
+#board a
+{
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	border: 1px black solid;
+}
+
+.selected
+{
+	border-style: dotted !important;
+}
+
+#status
+{
+	margin-left: 300px;
+}
