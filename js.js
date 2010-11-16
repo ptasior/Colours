@@ -1,7 +1,7 @@
-const WIDTH = 7; // supposed to be < 10
+const WIDTH = 9; // supposed to be < 10
 const HEIGHT = 5; // supposed to be < 10
-const COLOURS_NO = 5;
-const COLOURS = {0:'#cccccc', 1:'#ff0000', 2:'#00ff00', 3:'#0000ff', 4:'#ffff00'};
+const COLOURS_NO = 7;
+const COLOURS = {0:'red.png', 1:'green.png', 2:'blue.png', 3:'purple.png', 4:'yellow.png', 5:'stone.png', 6:'multi.png', STONE: 5, MULTI: 6};
 var tab;
 var list;
 var result;
@@ -17,13 +17,13 @@ function newGame()
 	result = new Array();
 	
 // 	Assigning number of colours to be removed
-	for(var i = 0; i < COLOURS_NO; i++)
+	for(var i = 0; i < COLOURS_NO-2; i++)
 		result[i] = Math.floor(Math.random()*100);
 	
 // 	Filling it
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
-			tab[i][j] = Math.floor(Math.random()*COLOURS_NO);
+			tab[i][j] = getRandom();
 		
 	repaint();
 }
@@ -32,11 +32,11 @@ function repaint()
 {
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
-			$(('e'+i)+j).setStyle({backgroundColor: COLOURS[tab[i][j]]});
+			$(('e'+i)+j).setStyle({backgroundImage: 'url(gfx/'+COLOURS[tab[i][j]]+')'});
 		
 	var txt = '';
-	for(var i = 0; i < COLOURS_NO; i++)
-		txt += '<span style="color:'+COLOURS[i]+'">'+result[i]+'</span><br>';
+	for(var i = 0; i < COLOURS_NO-2; i++)
+		txt += '<img src="gfx/'+COLOURS[i]+'">'+result[i]+'<br>';
 	
 	$('status').update(txt);
 }
@@ -47,7 +47,13 @@ function click()
 	var x = this.id.substr(1,1);
 	var y = this.id.substr(2,1);
 	
-	select(x,y);
+	if(selectable(x,y))
+		select(x,y);
+	else if((list.length > 0) && list[0][0] == x && list[0][1] == y) // Unselecting
+	{
+		list.shift();
+		$(('e'+x)+y).removeClassName('selected');
+	}
 }
 
 function dblclick()
@@ -55,28 +61,45 @@ function dblclick()
 	var x = this.id.substr(1,1);
 	var y = this.id.substr(2,1);
 	
-	select(x,y);
+	if(selectable(x,y))
+		select(x,y);
 	remove();
 	repaint();
 }
 
+function selectable(x,y)
+{
+	if((list.length > 0) && (list[0][0] == x && list[0][1] == y)) // Cannot select the same again
+		return false;
+	
+	if(tab[x][y] == COLOURS.STONE) // Is a stone
+		return false;
+	
+	if(list.length == 0) // Nothing selected
+		if(tab[x][y] == COLOURS.MULTI)
+			return false;
+		else
+			return true;
+	
+	if(list[0][0] == x || list[0][1] == y) // Selected item is in proper row/column
+		if(tab[x][y] == tab[list[list.length-1][0]][list[list.length-1][1]] || tab[x][y] == COLOURS.MULTI) // The same colour or multi
+			return true;
+	
+	return false;
+}
+
 function select(x, y)
 {
-	if(list.length == 0) // Start
-	{
-		list.unshift(new Array(x, y));
-		$(('e'+x)+y).addClassName('selected');
-	}
-	else if(list[0][0] == x && list[0][1] == y) // Removing previously added
-	{
-		list.shift();
-		$(('e'+x)+y).removeClassName('selected');
-	}
-	else if((list[0][0] == x || list[0][1] == y) && (tab[x][y] == tab[list[0][0]][list[0][1]])) // Adding new if in the same row or col and have the same colour
-	{
-		list.unshift(new Array(x, y));
-		$(('e'+x)+y).addClassName('selected');
-	}
+	list.unshift(new Array(x, y));
+	$(('e'+x)+y).addClassName('selected');
+}
+
+function getRandom()
+{
+	if(Math.random() < 0.05) // Special items (stone, multi)
+		return COLOURS_NO-2 + Math.floor(Math.random()*2);
+	
+	return Math.floor(Math.random()*(COLOURS_NO-2));
 }
 
 function remove()
@@ -90,7 +113,7 @@ function remove()
 	
 	while(list.length > 0)
 	{
-		tab[list[0][0]][list[0][1]] = Math.floor(Math.random()*COLOURS_NO); // Add an animation
+		tab[list[0][0]][list[0][1]] = getRandom(); // Add an animation
 		$(('e'+list[0][0])+list[0][1]).removeClassName('selected');
 		list.shift();
 	}
@@ -105,8 +128,8 @@ window.onload = function(){
 			e.observe('click', click);
 			e.observe('dblclick', dblclick);
 			// temporary
-			e.setStyle({left: i*21+'px'});
-			e.setStyle({top: j*21+'px'});
+			e.setStyle({left: i*40+'px'});
+			e.setStyle({top: j*55+'px'});
 		}
 	newGame();
 }

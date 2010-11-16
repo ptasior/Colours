@@ -1,8 +1,9 @@
 #board
 {
 	position: absolute;
-	width: 180px;
-	height: 180px;
+	width: 350px;
+	height: 300px;
+	left: 150px;
 	padding: 5px;
 	border: 1px gray solid;
 	overflow: auto;
@@ -11,9 +12,9 @@
 #board a
 {
 	position: absolute;
-	width: 18px;
-	height: 18px;
-	border: 1px black solid;
+	width: 39px;
+	height: 56px;
+	border: 1px none;
 }
 
 .selected
@@ -23,5 +24,4 @@
 
 #status
 {
-	margin-left: 300px;
 }
