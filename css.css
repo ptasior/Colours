@@ -1,13 +1,45 @@
+/*
+	Colours game
+	Copyright (C) 2010 Ptasior <ptasior3@gazeta.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 body
 {
 	background-color: #905803;
 }
 
+body>div:not(#board)
+{
+	-moz-box-shadow: 3px 3px 4px #000;
+	-webkit-box-shadow: 3px 3px 4px #000;
+	box-shadow: 3px 3px 4px #000;
+}
+
+h1
+{
+	color: white;
+	text-align: center;
+	text-shadow: -1px -1px 0px black;
+}
+
 #board
 {
 	position: absolute;
-	width: 680px;
-	height: 436px;
+	width: 675px;
+	height: 430px;
 	left: 100px;
 	padding: 5px;
 	overflow: auto;
@@ -30,8 +62,9 @@ body
 #status
 {
 	position: absolute;
-	top: 80px;
+	top: 75px;
 	left: 20px;
+	padding: 3px;
 	border: 1px dashed black;
 	background-color: white;
 }

@@ -1,7 +1,26 @@
-const WIDTH = 9; // supposed to be < 10
-const HEIGHT = 5; // supposed to be < 10
+/*
+	Colours game
+	Copyright (C) 2010 Ptasior <ptasior3@gazeta.pl>
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+const WIDTH = 9; // Supposed to be < 10
+const HEIGHT = 5; // Supposed to be < 10
 const COLOURS_NO = 7;
-const COLOURS = {0:'red.png', 1:'green.png', 2:'blue.png', 3:'purple.png', 4:'yellow.png', 5:'stone.png', 6:'multi.png', STONE: 5, MULTI: 6};
+const COLOURS = {0:'red.png', 1:'green.png', 2:'blue.png', 3:'purple.png', 4:'yellow.png', 5:'stone.png', 6:'multi.png', STONE: 5, MULTI: 6}; //Owful, but somehow logical
+
 var tab;
 var list;
 var result;
@@ -74,6 +93,7 @@ function newGame()
 	
 	clicks = 0;
 	
+// 	Timer
 	candle_top = 0;
 	timer = new PeriodicalExecuter(ontimer,1);
 	
@@ -91,7 +111,7 @@ function repaint()
 	for(var i = 0; i < COLOURS_NO-2; i++)
 		txt += '<img src="gfx/'+COLOURS[i]+'">'+result[i]+'<br>';
 	
-	txt += '<br>Clicks: '+clicks;
+	txt += '<br>Clicks: '+clicks; // TODO maybe add an icon instead text?
 	$('status').update(txt);
 }
 
@@ -112,6 +132,7 @@ function click()
 		remove();
 		repaint();
 		
+// 		Check if the game is finished (no items to be collected left)
 		for(var i = 0; i < COLOURS_NO-2; i++)
 			if(result[i] > 0)
 				return;
@@ -130,7 +151,7 @@ function mouseover()
 	var pos = new Pos(this.id);
 	if(selectable(pos))
 		select(pos);
-	if(list.length > 1 && list[1].x == pos.x && list[1].y == pos.y)
+	if(list.length > 1 && list[1].x == pos.x && list[1].y == pos.y) // If moving back - unselect
 	{
 		list[0].getItem().removeClassName('selected');
 		list.shift();
@@ -197,21 +218,22 @@ function getRandom()
 	if(Math.random() < 0.05) // Special items (stone, multi)
 		return COLOURS_NO-2 + Math.floor(Math.random()*2);
 	
-	return Math.floor(Math.random()*(COLOURS_NO-2));
+	return Math.floor(Math.random()*(COLOURS_NO-2)); // Normal items
 }
 
 function remove()
 {
-	if(list.length < 2)
+	if(list.length < 2) // Chains have to be at least 3 items long
 		return;
 	
+// 	Update the number of left items
 	result[tab[list.first().x][list.first().y]] -= list.length;
 	if(result[tab[list.first().x][list.first().y]] < 0)
 		result[tab[list.first().x][list.first().y]] = 0;
 	
-	while(list.length > 0)
+	while(list.length > 0) // Replace old with new ones and clear the list
 	{
-		tab[list.first().x][list.first().y] = getRandom(); // Add an animation
+		tab[list.first().x][list.first().y] = getRandom(); // TODO Add an animation
 		list.first().getItem().removeClassName('selected');
 		list.shift();
 	}
@@ -221,17 +243,23 @@ function remove()
 
 function ontimer()
 {
+	// Here is the place to tweak the game speeed
 	candle_top+=0.5;
-	if(candle_top > 220)
+	
+	if(candle_top > 220) // We reached the end of candle length
 	{
 		timer.stop();
 		alert('Time is over');
 		newGame();
 	}
+	
+	// Move the candle down
 	$('candle_img').setStyle({marginTop: Math.floor(candle_top)+'px'});
 }
 
 window.onload = function(){
+	
+// 	Create board
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
 		{
@@ -243,7 +271,8 @@ window.onload = function(){
 		
 	newGame();
 	
-//	DON'T EVEN LOOK AT THIS - this is treated as a dangerous crime in some countries ;)
+//	DON'T EVEN LOOK AT THIS - this might treated as a serious crime in some countries!
+// The result should be pasted into stylesheet file! (TODO, FIXME)
 	var txt = '';
 	for(var i = 0; i < WIDTH; i++)
 		for(var j = 0; j < HEIGHT; j++)
