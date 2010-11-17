@@ -46,6 +46,14 @@ Array.prototype.last = function(){
 	return this[this.length-1];
 }
 
+// Returns true if array contains given Pos element
+Array.prototype.contains = function(p){
+	for(var i = 0; i < this.length; i++) // So check all items on the list
+		if(this[i].x == p.x && this[i].y == p.y)
+			return true;
+	return false;
+}
+
 Array.prototype.isEmpty = function(){
 	return this.length == 0;
 }
@@ -170,10 +178,9 @@ function selectable(pos)
 			return true;
 	
 	if(!list.isEmpty()) // Cannot select the same again
-		for(var i = 0; i < list.length; i++) // So check all items on the list
-			if(list[i].x == pos.x && list[i].y == pos.y)
-				return false;
-			
+		if(list.contains(pos))
+			return false;
+	
 	if(list.length > 1)  // Avoiding jumping back over already selected
 	{
 		if((list[1].y == list[0].y && list[0].y == pos.y) && // If 2 last are the same axis
@@ -190,8 +197,10 @@ function selectable(pos)
 		{
 			var t = list.first().y-pos.y;
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
-				if(tab[pos.x][pos.y+t] == COLOURS.STONE)
+				if(tab[pos.x][pos.y+t] == COLOURS.STONE) // It is a stone - cannot jump
 					return false;
+				else if(tab[pos.x][pos.y+t] == tab[pos.x][pos.y] || tab[pos.x][pos.y+t] == COLOURS.MULTI) // If we jump over potentially selectable item
+					return list.contains(new Pos(pos.x, pos.y+t)); // ...allow only if it is already selected
 			return true;
 		}
 		if(list.first().y == pos.y) // Selected item is in the same row
@@ -200,6 +209,8 @@ function selectable(pos)
 			for(t-=t.sign(); t != 0; t-=t.sign()) // Check whether there is no stone or other similar item on the way
 				if(tab[pos.x+t][pos.y] == COLOURS.STONE)
 					return false;
+				else if(tab[pos.x+t][pos.y] == tab[pos.x][pos.y] || tab[pos.x+t][pos.y] == COLOURS.MULTI) // If we jump over potentially selectable item
+					return list.contains(new Pos(pos.x+t, pos.y)); // ...allow only if it is already selected
 			return true;
 		}
 	}
